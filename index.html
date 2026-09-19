@@ -133,6 +133,8 @@ h2.sec-title{font-size:21px;font-weight:900;margin:0;letter-spacing:.02em}
 .tag.評量{background:var(--alert-soft);color:var(--alert)}
 .tag.健康{background:var(--warm-soft);color:var(--warm)}
 .tag.報名{background:var(--brand-soft);color:var(--brand)}
+.na{font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;color:var(--ink3);
+  background:none;border:1px dashed var(--line2);white-space:nowrap}
 .ics{font-size:12.5px;font-weight:700;color:var(--ink3);background:none;border:1px solid var(--line2);
   border-radius:6px;padding:2px 9px;cursor:pointer;font-family:inherit;text-decoration:none;
   display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
@@ -460,7 +462,7 @@ footer b{color:var(--ink2)}
     <div class="sec-head"><span class="sec-num">5</span><h2 class="sec-title">校務宣導</h2></div>
 
     <details class="acc">
-      <summary><span class="sum-ico">📚</span><span class="sum-txt">教務處 — 閱讀與學力檢測<span class="sum-sub">布可星球、115 年度檢測結果</span></span><span class="caret"></span></summary>
+      <summary><span class="sum-ico">📚</span><span class="sum-txt">教務處 — 閱讀與學力檢測<span class="sum-sub">閱讀習慣全年級適用・檢測結果為三～六年級</span></span><span class="caret"></span></summary>
       <div class="acc-body">
         <div class="callout"><b>閱讀力，就是孩子未來的學習力。</b></div>
         <p style="margin:0 0 12px">研究顯示，閱讀能力是孩子所有學習的重要基礎。經常閱讀不僅能增加詞彙量、提升閱讀理解，更能幫助孩子培養專注力、思考力、表達力及資訊判讀能力。OECD 的 PISA 資料也發現，經常「為興趣而閱讀」的孩子，閱讀表現通常較佳。</p>
@@ -504,7 +506,7 @@ footer b{color:var(--ink2)}
     </details>
 
     <details class="acc">
-      <summary><span class="sum-ico">🏃</span><span class="sum-txt">學務處 — 校慶、志工與獎狀<span class="sum-sub">運動會、親子志工、獎狀登記</span></span><span class="caret"></span></summary>
+      <summary><span class="sum-ico">🏃</span><span class="sum-txt">學務處 — 校慶、志工與獎狀<span class="sum-sub">校慶全年級・親子志工為三～六年級</span></span><span class="caret"></span></summary>
       <div class="acc-body">
         <h4>校慶運動會</h4>
         <ul class="dot">
@@ -546,7 +548,7 @@ footer b{color:var(--ink2)}
     </details>
 
     <details class="acc">
-      <summary><span class="sum-ico">🎓</span><span class="sum-txt">畢業獎項採計說明<span class="sum-sub">低年級現在就要開始留存資料</span></span><span class="caret"></span></summary>
+      <summary><span class="sum-ico">🎓</span><span class="sum-txt">畢業獎項採計說明<span class="sum-sub">一年級：現在只要開始留存獎狀</span></span><span class="caret"></span></summary>
       <div class="acc-body">
         <div class="callout warn"><b>一年級家長請特別注意</b>　因應日後六年級申請畢業獎項之所需，請<strong>從現在開始留存</strong>孩子國小在學期間各項競賽秩序冊、獎狀及志工服務證明。</div>
         <h4>畢業成績各年級佔比</h4>
@@ -589,7 +591,7 @@ footer b{color:var(--ink2)}
     </details>
 
     <details class="acc">
-      <summary><span class="sum-ico">🏫</span><span class="sum-txt">116 學年度小一招生說明會<span class="sum-sub">歡迎分享給需要的家庭</span></span><span class="caret"></span></summary>
+      <summary><span class="sum-ico">🏫</span><span class="sum-txt">116 學年度小一招生說明會<span class="sum-sub">對外招生・歡迎分享給需要的家庭</span></span><span class="caret"></span></summary>
       <div class="acc-body">
         <ul class="dot">
           <li><b>第一場次</b>：2026 年 12 月 19 日（六）</li>
@@ -679,12 +681,12 @@ footer b{color:var(--ink2)}
   "use strict";
 
   var EVENTS = [
-    {s:"2026-09-22", t:"2027 美國冬季探索營 家長說明會（四～六年級）", n:"晚上 18:00～19:00", g:"報名"},
+    {s:"2026-09-22", t:"2027 美國冬季探索營 家長說明會（四～六年級）", n:"晚上 18:00～19:00", g:"報名", x:"本班不適用"},
     {s:"2026-09-25", e:"2026-09-28", t:"中秋、教師節連假", g:"假期"},
-    {s:"2026-10-02", t:"2027 探索營 報名截止（四～六年級）", n:"原簡報標示（二），實際為星期五", g:"報名"},
-    {s:"2026-10-03", t:"親子淨灘（六年級）", n:"星期六上午", g:"活動"},
+    {s:"2026-10-02", t:"2027 探索營 報名截止（四～六年級）", n:"原簡報標示（二），實際為星期五", g:"報名", x:"本班不適用"},
+    {s:"2026-10-03", t:"親子淨灘（六年級）", n:"星期六上午", g:"活動", x:"本班不適用"},
     {s:"2026-10-06", t:"蟯蟲檢查工具發放", n:"放學前發下，請帶回家備用", g:"健康"},
-    {s:"2026-10-06", t:"2027 探索營 甄選（四～六年級）", n:"中午 12:40 起", g:"報名"},
+    {s:"2026-10-06", t:"2027 探索營 甄選（四～六年級）", n:"中午 12:40 起", g:"報名", x:"本班不適用"},
     {s:"2026-10-07", e:"2026-10-08", t:"蟯蟲貼片採檢", n:"兩天早上起床、上廁所前各貼一次", g:"健康"},
     {s:"2026-10-08", t:"尿液檢體送交健康中心", n:"採集當天早上尿液，08:00 前送達", g:"健康"},
     {s:"2026-10-09", e:"2026-10-11", t:"國慶日連假", g:"假期"},
@@ -695,13 +697,13 @@ footer b{color:var(--ink2)}
     {s:"2026-11-13", t:"校慶補假一天", g:"假期"},
     {s:"2026-11-19", e:"2026-11-26", t:"一下 課輔才藝選課", g:"報名"},
     {s:"2026-11-23", t:"健檢前一日 請幫孩子清耳垢", n:"健檢當日穿運動服、早上務必刷牙", g:"健康"},
-    {s:"2026-12-19", t:"116 學年度小一招生說明會（第一場）", g:"活動"},
+    {s:"2026-12-19", t:"116 學年度小一招生說明會（第一場）", n:"對外招生，歡迎分享給有需要的親友", g:"活動", x:"對外招生"},
     {s:"2026-12-25", e:"2026-12-27", t:"行憲紀念日連假", g:"假期"},
     {s:"2026-12-30", t:"歲末祝福", n:"穿制服，女生雙辮", g:"活動"},
     {s:"2027-01-01", e:"2027-01-03", t:"元旦連假", g:"假期"},
-    {s:"2027-01-09", t:"116 學年度小一招生說明會（第二場）", g:"活動"},
+    {s:"2027-01-09", t:"116 學年度小一招生說明會（第二場）", n:"對外招生，歡迎分享給有需要的親友", g:"活動", x:"對外招生"},
     {s:"2027-01-12", e:"2027-01-13", t:"第二次定期評量", n:"第一冊 & 數學", g:"評量"},
-    {s:"2027-01-16", t:"歡喜好厝邊～掃街（三、四、五年級）", n:"星期六上午", g:"活動"},
+    {s:"2027-01-16", t:"歡喜好厝邊～掃街（三、四、五年級）", n:"星期六上午", g:"活動", x:"本班不適用"},
     {s:"2027-01-20", t:"休業式", n:"12:00 放學", g:"重要"},
     {s:"2027-02-11", t:"第二學期開學日", g:"重要"}
   ];
@@ -832,6 +834,11 @@ footer b{color:var(--ink2)}
         var tg = document.createElement("span");
         tg.className = "tag " + ev.g; tg.textContent = ev.g;
         meta.appendChild(tg);
+      }
+      if (ev.x){
+        var na = document.createElement("span");
+        na.className = "na"; na.textContent = ev.x;
+        meta.appendChild(na);
       }
       var stx = document.createElement("span");
       stx.className = "ev-status"; stx.textContent = st.label;
