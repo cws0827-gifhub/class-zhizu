@@ -126,15 +126,25 @@ h2.sec-title{font-size:21px;font-weight:900;margin:0;letter-spacing:.02em}
 .ev-main{flex:1;min-width:0}
 .ev-title{font-weight:700;font-size:16.5px;line-height:1.5}
 .ev-note{font-size:14.5px;color:var(--ink2);margin-top:2px}
-.ev-foot{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap}
+.ev-foot{display:flex;align-items:center;gap:8px 10px;margin-top:8px;flex-wrap:wrap}
+.ev-meta,.ev-acts{display:flex;align-items:center;gap:7px}
 .tag{font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--surface2);color:var(--ink2)}
 .tag.假期{background:var(--ok-soft);color:var(--ok)}
 .tag.評量{background:var(--alert-soft);color:var(--alert)}
 .tag.健康{background:var(--warm-soft);color:var(--warm)}
 .tag.報名{background:var(--brand-soft);color:var(--brand)}
 .ics{font-size:12.5px;font-weight:700;color:var(--ink3);background:none;border:1px solid var(--line2);
-  border-radius:6px;padding:2px 9px;cursor:pointer;font-family:inherit}
+  border-radius:6px;padding:2px 9px;cursor:pointer;font-family:inherit;text-decoration:none;
+  display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .ics:active{border-color:var(--brand);color:var(--brand)}
+.ics.gcal{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+.ics.gcal:active{filter:brightness(.94)}
+.gicon{width:11px;height:11px;flex:0 0 auto}
+.bulk{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--brand);color:#fff;border:0;border-radius:12px;padding:13px 16px;
+  font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+.bulk:active{filter:brightness(.93)}
+.bulk-hint{font-size:13.5px;color:var(--ink3);line-height:1.65;margin:9px 0 14px;text-align:center}
 .ev-status{font-size:12px;font-weight:700;color:var(--ink3)}
 .ev.soon .ev-status{color:var(--warm)}
 
@@ -259,10 +269,12 @@ footer b{color:var(--ink2)}
   <!-- 2 行事曆 -->
   <section id="cal">
     <div class="sec-head"><span class="sec-num">2</span><h2 class="sec-title">行事曆與重要日期</h2></div>
+    <button class="bulk" id="bulkIcs" type="button">📅　把全部日期一次加進行事曆</button>
+    <p class="bulk-hint">下載後點開檔案即可匯入 iPhone／Google／Outlook 行事曆。<br>只想加某一筆，用下方每列的按鈕。</p>
     <div class="cal-tools">
       <button class="tgl" id="tglPast" aria-pressed="false">顯示已過去的日期</button>
     </div>
-    <div class="cal" id="cal"></div>
+    <div class="cal" id="calList"></div>
     <p class="note">日期整理自 115-1 親師日簡報。<strong>正式時間仍以學校公告與聯絡簿通知為準</strong>，如有異動請依學校通知。</p>
   </section>
 
@@ -712,7 +724,7 @@ footer b{color:var(--ink2)}
     lastMod.getFullYear() + " 年 " + (lastMod.getMonth()+1) + " 月 " + lastMod.getDate() + " 日";
 
   // ----- 行事曆渲染 -----
-  var cal = document.getElementById("cal");
+  var cal = document.getElementById("calList");
   var showPast = false;
 
   function status(ev){
@@ -725,31 +737,59 @@ footer b{color:var(--ink2)}
     return {k:"future", label:days + " 天後"};
   }
 
-  function icsFor(ev){
-    var s = parse(ev.s), e = ev.e ? parse(ev.e) : s;
-    var endEx = new Date(e.getTime() + MS); // DTEND is exclusive for all-day
-    var lines = [
-      "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//一年知足班//班務宣導//ZH","CALSCALE:GREGORIAN",
-      "BEGIN:VEVENT",
-      "UID:" + ymd(s) + "-" + Math.random().toString(36).slice(2) + "@class",
-      "DTSTAMP:" + ymd(new Date()) + "T000000Z",
-      "DTSTART;VALUE=DATE:" + ymd(s),
-      "DTEND;VALUE=DATE:" + ymd(endEx),
-      "SUMMARY:[一知足] " + ev.t,
-      "DESCRIPTION:" + (ev.n || ""),
-      "END:VEVENT","END:VCALENDAR"
-    ];
-    return lines.join("\r\n");
+  // ICS text must escape , ; and newlines (RFC 5545)
+  function esc(t){
+    return String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;")
+                          .replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
   }
 
-  function download(ev){
-    var blob = new Blob([icsFor(ev)], {type:"text/calendar;charset=utf-8"});
+  function span(ev){
+    var s = parse(ev.s), e = ev.e ? parse(ev.e) : s;
+    return {s:s, e:e, endEx:new Date(e.getTime() + MS)}; // all-day DTEND is exclusive
+  }
+
+  function vevent(ev, i){
+    var d = span(ev);
+    return [
+      "BEGIN:VEVENT",
+      "UID:" + ymd(d.s) + "-" + i + "@class-zhizu",
+      "DTSTAMP:" + ymd(new Date()) + "T000000Z",
+      "DTSTART;VALUE=DATE:" + ymd(d.s),
+      "DTEND;VALUE=DATE:" + ymd(d.endEx),
+      "SUMMARY:" + esc("[一知足] " + ev.t),
+      "DESCRIPTION:" + esc(ev.n || ""),
+      "END:VEVENT"
+    ].join("\r\n");
+  }
+
+  function icsDoc(list){
+    return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//一年知足班//班務宣導//ZH",
+            "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:一年知足班 班務宣導"]
+      .concat(list.map(vevent))
+      .concat(["END:VCALENDAR"]).join("\r\n");
+  }
+
+  function saveIcs(text, name){
+    var blob = new Blob([text], {type:"text/calendar;charset=utf-8"});
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = url; a.download = ev.s + ".ics";
+    a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   }
+
+  // One-tap Google Calendar: opens a pre-filled event, user just presses 儲存.
+  function gcalUrl(ev){
+    var d = span(ev);
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE"
+      + "&text=" + encodeURIComponent("[一知足] " + ev.t)
+      + "&dates=" + ymd(d.s) + "/" + ymd(d.endEx)
+      + "&details=" + encodeURIComponent((ev.n ? ev.n + "\n\n" : "") + "一年知足班 班務宣導");
+  }
+
+  var GICON = '<svg class="gicon" viewBox="0 0 24 24" aria-hidden="true">'
+    + '<path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10z"/>'
+    + '</svg>';
 
   function render(){
     cal.textContent = "";
@@ -785,19 +825,37 @@ footer b{color:var(--ink2)}
       }
       var foot = document.createElement("div");
       foot.className = "ev-foot";
+
+      var meta = document.createElement("div");
+      meta.className = "ev-meta";
       if (ev.g){
         var tg = document.createElement("span");
         tg.className = "tag " + ev.g; tg.textContent = ev.g;
-        foot.appendChild(tg);
+        meta.appendChild(tg);
       }
       var stx = document.createElement("span");
       stx.className = "ev-status"; stx.textContent = st.label;
-      foot.appendChild(stx);
+      meta.appendChild(stx);
+      foot.appendChild(meta);
+
       if (st.k !== "past"){
+        var acts = document.createElement("div");
+        acts.className = "ev-acts";
+
+        var g = document.createElement("a");
+        g.className = "ics gcal";
+        g.href = gcalUrl(ev);
+        g.target = "_blank"; g.rel = "noopener";
+        g.innerHTML = GICON + "<span>Google 行事曆</span>";
+        acts.appendChild(g);
+
         var btn = document.createElement("button");
-        btn.className = "ics"; btn.type = "button"; btn.textContent = "加入行事曆";
-        btn.addEventListener("click", function(){ download(ev); });
-        foot.appendChild(btn);
+        btn.className = "ics"; btn.type = "button"; btn.textContent = "下載 .ics";
+        btn.title = "可匯入 iPhone 內建行事曆或 Outlook";
+        btn.addEventListener("click", function(){ saveIcs(icsDoc([ev]), ev.s + ".ics"); });
+        acts.appendChild(btn);
+
+        foot.appendChild(acts);
       }
       main.appendChild(foot);
 
@@ -812,6 +870,11 @@ footer b{color:var(--ink2)}
       cal.appendChild(p);
     }
   }
+
+  document.getElementById("bulkIcs").addEventListener("click", function(){
+    var upcoming = EVENTS.filter(function(ev){ return now <= span(ev).e; });
+    saveIcs(icsDoc(upcoming.length ? upcoming : EVENTS), "一年知足班-行事曆.ics");
+  });
 
   var tgl = document.getElementById("tglPast");
   tgl.addEventListener("click", function(){
